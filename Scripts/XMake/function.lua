@@ -3,22 +3,33 @@
 -- ===============================================
 -- Recursively traverse all folders and their subfolders. If .h or .hpp files are found, add the folder to the project.
 function add_includedirs_recursively(dir)
-    local has_header_files = false
+    local has_h_files = false
+    local has_hpp_files = false
+    
     for _, file in ipairs(os.files(path.join(dir, "*.h"))) do
-        has_header_files = true
+        has_h_files = true
         break
     end
     for _, file in ipairs(os.files(path.join(dir, "*.hpp"))) do
-        has_header_files = true
+        has_hpp_files = true
         break
     end
-    if has_header_files then
+    
+    if has_h_files or has_hpp_files then
         add_includedirs(dir, {
             public = true
         })
-        add_headerfiles(dir .. "/*.hpp", {
-            public = true
-        })
+        -- 只添加存在的文件类型
+        if has_h_files then
+            add_headerfiles(dir .. "/*.h", {
+                public = true
+            })
+        end
+        if has_hpp_files then
+            add_headerfiles(dir .. "/*.hpp", {
+                public = true
+            })
+        end
     end
 
     for _, subdir in ipairs(os.dirs(path.join(dir, "*"))) do
@@ -35,26 +46,37 @@ function add_includedirs_recursively_skipped(dir, skip_dirs)
         end
     end
 
-    local has_header_files = false
+    local has_h_files = false
+    local has_hpp_files = false
+    
     for _, file in ipairs(os.files(path.join(dir, "*.h"))) do
-        has_header_files = true
+        has_h_files = true
         break
     end
     for _, file in ipairs(os.files(path.join(dir, "*.hpp"))) do
-        has_header_files = true
+        has_hpp_files = true
         break
     end
-    if has_header_files then
+    
+    if has_h_files or has_hpp_files then
         add_includedirs(dir, {
             public = true
         })
-        add_headerfiles(dir .. "/*.h", {
-            public = true
-        })
+        -- 只添加存在的文件类型
+        if has_h_files then
+            add_headerfiles(dir .. "/*.h", {
+                public = true
+            })
+        end
+        if has_hpp_files then
+            add_headerfiles(dir .. "/*.hpp", {
+                public = true
+            })
+        end
     end
 
     for _, subdir in ipairs(os.dirs(path.join(dir, "*"))) do
-        add_includedirs_recursively_skipped(subdir)
+        add_includedirs_recursively_skipped(subdir, skip_dirs)  -- 传递 skip_dirs 参数
     end
 end
 
